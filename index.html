@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Oğuzhan Finans</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { darkbg: '#0b1120', card: '#151f32' } } }
+    }
+  </script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .card { @apply bg-card rounded-2xl p-4 border border-slate-700/50; }
+    .btn { @apply px-4 py-2.5 rounded-xl font-medium transition active:scale-95 text-sm; }
+    .btn-primary { @apply bg-blue-600 hover:bg-blue-500 text-white; }
+    .btn-success { @apply bg-emerald-600 hover:bg-emerald-500 text-white; }
+    .btn-outline { @apply border border-slate-600 hover:bg-slate-700 text-slate-200; }
+  </style>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen">
+
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="card w-full max-w-sm space-y-5">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold">Oğuzhan Finans</h1>
+        <p class="text-sm text-slate-400 mt-1">Kişisel Finans Paneli</p>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Kullanıcı Adı</label>
+        <input id="username" type="text" value="oguzhan" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Şifre</label>
+        <input id="password" type="password" value="123456" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+      </div>
+      <button onclick="login()" class="btn btn-primary w-full">Giriş Yap</button>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <header class="bg-slate-900/95 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+      <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div>
+          <h1 class="font-bold text-lg">Oğuzhan Finans</h1>
+          <p class="text-xs text-slate-400"><span id="monthLabel"></span></p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="refreshAll()" class="btn btn-outline text-xs">Yenile</button>
+          <button onclick="logout()" class="btn btn-outline text-xs">Çıkış</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 py-5 space-y-5 pb-16">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="card"><p class="text-xs text-slate-400">Aktif Aylık Borç</p><p id="totalDebt" class="text-xl font-bold mt-1">—</p></div>
+        <div class="card"><p class="text-xs text-slate-400">Kalan Bütçe</p><p id="remaining" class="text-xl font-bold mt-1 text-emerald-400">—</p></div>
+        <div class="card"><p class="text-xs text-slate-400">Birikim</p><p id="savings" class="text-xl font-bold mt-1 text-blue-400">—</p></div>
+        <div class="card"><p class="text-xs text-slate-400">Net Varlık</p><p id="netWorth" class="text-xl font-bold mt-1">—</p></div>
+      </div>
+
+      <div class="card space-y-3">
+        <h2 class="font-semibold">Gelir & Birikim</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400">Aylık Net Gelir</label>
+            <div class="flex gap-2 mt-1">
+              <input id="incomeInput" type="number" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2">
+              <button onclick="updateIncome()" class="btn btn-primary">Kaydet</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Birikim / Nakit</label>
+            <div class="flex gap-2 mt-1">
+              <input id="savingsInput" type="number" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2">
+              <button onclick="updateSavings()" class="btn btn-primary">Kaydet</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex justify-between mb-3">
+          <h2 class="font-semibold">Canlı Kur & Maden</h2>
+          <span id="usdRate" class="text-sm text-emerald-400">USD: ...</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="bg-slate-800/60 rounded-xl p-3 text-center"><p class="text-xs text-slate-400">Gram Altın</p><p id="gramGold" class="font-bold text-lg">...</p></div>
+          <div class="bg-slate-800/60 rounded-xl p-3 text-center"><p class="text-xs text-slate-400">Çeyrek</p><p id="quarterGold" class="font-bold text-lg">...</p></div>
+          <div class="bg-slate-800/60 rounded-xl p-3 text-center"><p class="text-xs text-slate-400">Ons Altın</p><p id="ozGold" class="font-bold text-lg">...</p></div>
+          <div class="bg-slate-800/60 rounded-xl p-3 text-center"><p class="text-xs text-slate-400">Gümüş</p><p id="silver" class="font-bold text-lg">...</p></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between mb-3">
+          <h2 class="font-semibold">Borçlar</h2>
+          <button onclick="nextMonth()" class="btn btn-primary text-xs">Yeni Aya Geç</button>
+        </div>
+        <div id="debts" class="space-y-3"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="font-semibold mb-2">Analiz</h2>
+        <div id="analysis" class="text-sm text-slate-300 space-y-1"></div>
+      </div>
+
+      <div>
+        <div class="flex justify-between mb-3">
+          <h2 class="font-semibold">Haberler</h2>
+          <button onclick="loadNews()" class="text-xs text-blue-400">Yenile</button>
+        </div>
+        <div id="news" class="card max-h-64 overflow-y-auto text-sm"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="font-semibold mb-3">Portföy</h2>
+        <div id="portfolio" class="grid grid-cols-2 gap-2 text-sm"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+const USER = "oguzhan", PASS = "123456";
+const initialDebts = [
+  {id:'ing',name:'ING İhtiyaç Kredisi',amount:17328.64,remaining:24,start:null,note:'24 ay'},
+  {id:'akbank',name:'Akbank İhtiyaç Kredisi',amount:8708,remaining:7,start:null,note:'Kalan 7 taksit'},
+  {id:'diger',name:'6 Aylık Diğer Kredi',amount:4000,remaining:6,start:null,note:''},
+  {id:'garanti',name:'GarantiBBVA Ertelemeli',amount:7732.79,remaining:24,start:'2027-01',note:'Ocak 2027'},
+  {id:'kk',name:'Kredi Kartı',amount:15000,remaining:null,start:null,note:'Her ay başı'},
+  {id:'fatura',name:'Sabit Fatura',amount:4000,remaining:6,start:null,note:'Kalan 6 ay'}
+];
+const portfolio = [
+  {code:'MZL',name:'İkinci Dengeli',pct:35},{code:'AE1',name:'Para Piyasası',pct:25},
+  {code:'EAE',name:'Altın EYF',pct:15},{code:'AEH',name:'Hisse EYF',pct:15},
+  {code:'AVR',name:'Teknoloji',pct:5},{code:'AVO',name:'Özel Sektör',pct:5}
+];
+let state = {debts:[],month:'',income:53000,savings:0,usd:0};
+
+function login(){if(document.getElementById('username').value.trim()===USER&&document.getElementById('password').value===PASS){localStorage.setItem('finans_logged','1');showApp()}else alert('Hatalı giriş')}
+function logout(){localStorage.removeItem('finans_logged');location.reload()}
+function showApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');init()}
+
+function loadState(){const r=localStorage.getItem('oguzhan_finans_v3');if(r)state=JSON.parse(r);else{state.debts=JSON.parse(JSON.stringify(initialDebts));state.month=currentMonth();state.income=53000;state.savings=0}}
+function saveState(){localStorage.setItem('oguzhan_finans_v3',JSON.stringify(state))}
+function currentMonth(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function monthName(m){const[y,mo]=m.split('-');const n=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];return n[parseInt(mo)-1]+' '+y}
+function tl(n){return Number(n).toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺'}
+
+async function fetchUsd(){try{const r=await fetch('https://open.er-api.com/v6/latest/USD');const d=await r.json();if(d?.rates?.TRY){state.usd=d.rates.TRY;document.getElementById('usdRate').textContent='USD: '+state.usd.toFixed(2);return}}catch{}state.usd=34.9;document.getElementById('usdRate').textContent='USD: ~34.90'}
+async function fetchMetals(){let goldOz=null,silverOz=null;try{const r=await fetch('https://api.metals.live/v1/spot');const d=await r.json();if(Array.isArray(d)){const g=d.find(x=>(x.metal||x.name||'').toLowerCase().includes('gold'));const s=d.find(x=>(x.metal||x.name||'').toLowerCase().includes('silver'));if(g)goldOz=g.price||g.value;if(s)silverOz=s.price||s.value}}catch{}if(goldOz&&state.usd){const gram=(goldOz/31.1035)*state.usd;document.getElementById('gramGold').textContent=tl(gram);document.getElementById('quarterGold').textContent=tl(gram*1.75);document.getElementById('ozGold').textContent=goldOz.toFixed(0)+' $'}else{document.getElementById('gramGold').textContent='—';document.getElementById('quarterGold').textContent='—';document.getElementById('ozGold').textContent='—'}document.getElementById('silver').textContent=silverOz?silverOz.toFixed(2)+' $':'—'}
+async function loadNews(){const box=document.getElementById('news');box.innerHTML='<p class="text-slate-500 p-3 text-center">Yükleniyor...</p>';try{const r=await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.bloomberght.com/rss');const d=await r.json();if(d.items?.length){box.innerHTML=d.items.slice(0,8).map(i=>`<a href="${i.link}" target="_blank" class="block p-3 rounded-xl hover:bg-slate-800/60"><p class="font-medium">${i.title}</p><p class="text-xs text-slate-500 mt-1">${i.pubDate?new Date(i.pubDate).toLocaleDateString('tr-TR'):''}</p></a>`).join('');return}}catch{}box.innerHTML='<p class="text-slate-500 p-3 text-center">Haber alınamadı</p>'}
+
+function isActive(d){if(d.start==='2027-01')return(state.month||currentMonth())>='2027-01';return true}
+function renderDebts(){document.getElementById('debts').innerHTML=state.debts.map(d=>{const active=isActive(d),paid=!!d.paid;return`<div class="card ${paid?'opacity-60':''}"><div class="flex justify-between"><div><h3 class="font-semibold">${d.name}</h3><p class="text-xs text-slate-400">${d.note||''}</p>${d.remaining?`<p class="text-xs text-slate-500 mt-1">Kalan: ${d.remaining} ay</p>`:''}</div>${paid?'<span class="text-[10px] bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded-full">Ödendi</span>':!active?'<span class="text-[10px] bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full">2027</span>':''}</div><p class="text-lg font-bold mt-2 ${paid?'line-through text-slate-500':''}">${tl(d.amount)}</p><div class="flex gap-2 mt-3">${!paid&&active?`<button onclick="markPaid('${d.id}')" class="btn btn-success flex-1">Ödedim</button>`:paid?`<button onclick="undoPaid('${d.id}')" class="btn btn-outline flex-1">Geri Al</button>`:`<button disabled class="btn btn-outline flex-1 opacity-40">Bekliyor</button>`}<button onclick="mail('${d.id}')" class="btn btn-outline">✉</button></div></div>`}).join('');updateSummary();renderAnalysis()}
+function updateSummary(){const active=state.debts.filter(d=>isActive(d)&&!d.paid);const monthly=active.reduce((s,d)=>s+d.amount,0);let totalRem=0;state.debts.forEach(d=>{if(isActive(d)&&d.remaining)totalRem+=d.amount*d.remaining;else if(isActive(d))totalRem+=d.amount*12});document.getElementById('totalDebt').textContent=tl(monthly);document.getElementById('remaining').textContent=tl(state.income-monthly);document.getElementById('savings').textContent=tl(state.savings);document.getElementById('netWorth').textContent=tl(state.savings-totalRem);document.getElementById('monthLabel').textContent=monthName(state.month);document.getElementById('incomeInput').value=state.income;document.getElementById('savingsInput').value=state.savings}
+function renderAnalysis(){const active=state.debts.filter(d=>isActive(d)&&!d.paid);const monthly=active.reduce((s,d)=>s+d.amount,0);const left=state.income-monthly;const em=state.savings>0?(state.savings/monthly).toFixed(1):0;let h=`<p>• Bu ay kalan: <strong class="text-emerald-400">${tl(left)}</strong></p><p>• Acil fon: <strong>${em} aylık</strong></p>`;if((state.month||currentMonth())<'2027-01')h+=`<p class="text-amber-400">• Ocak 2027’de Garanti kredisi başlıyor (+7.733 ₺)</p>`;document.getElementById('analysis').innerHTML=h}
+function markPaid(id){const d=state.debts.find(x=>x.id===id);if(d){d.paid=true;saveState();renderDebts()}}
+function undoPaid(id){const d=state.debts.find(x=>x.id===id);if(d){d.paid=false;saveState();renderDebts()}}
+function nextMonth(){if(!confirm('Yeni aya geçilecek. Ödemeler sıfırlanacak. Emin misin?'))return;let[y,m]=state.month.split('-').map(Number);m++;if(m>12){m=1;y++}state.month=`${y}-${String(m).padStart(2,'0')}`;state.debts.forEach(d=>{d.paid=false;if(d.remaining&&d.remaining>0&&isActive(d))d.remaining--});saveState();renderDebts()}
+function mail(id){const d=state.debts.find(x=>x.id===id);if(!d)return;location.href=`mailto:oguzhanborluoglu@gmail.com?subject=${encodeURIComponent('Borç: '+d.name)}&body=${encodeURIComponent('Tutar: '+tl(d.amount)+'\nDönem: '+monthName(state.month))}`}
+function updateIncome(){const v=Number(document.getElementById('incomeInput').value);if(v>0){state.income=v;saveState();updateSummary();renderAnalysis();alert('Gelir güncellendi')}}
+function updateSavings(){state.savings=Number(document.getElementById('savingsInput').value)||0;saveState();updateSummary();renderAnalysis();alert('Birikim güncellendi')}
+function renderPortfolio(){document.getElementById('portfolio').innerHTML=portfolio.map(p=>`<div class="bg-slate-800/50 rounded-xl p-3"><div class="flex justify-between"><span class="font-bold text-blue-400">${p.code}</span><span>${p.pct}%</span></div><p class="text-xs text-slate-400 mt-1">${p.name}</p></div>`).join('')}
+async function refreshAll(){await fetchUsd();await fetchMetals();await loadNews();updateSummary()}
+function init(){loadState();if(!state.month)state.month=currentMonth();renderDebts();renderPortfolio();refreshAll()}
+if(localStorage.getItem('finans_logged')==='1')showApp();
+</script>
+</body>
+</html>
